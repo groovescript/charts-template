@@ -19,4 +19,4 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: groovescript/chart-action@v1
+      - uses: groovescript/chart-action@v0
