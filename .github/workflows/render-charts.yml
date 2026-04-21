@@ -4,19 +4,44 @@ on:
   pull_request:
     paths:
       - "**/*.gs"
+  push:
+    branches:
+      - master
+    paths:
+      - "**/*.gs"
 
 jobs:
   render:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+          repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create PDF update branch
+        if: github.event_name == 'push'
+        run: |
+          git checkout -b "pdf-renders/${{ github.sha }}"
+          git push -u origin "pdf-renders/${{ github.sha }}"
+
       - uses: groovescript/chart-action@v0
+        with:
+          base-ref: ${{ github.event_name == 'push' && 'master' || '' }}
+          head-ref: ${{ github.event_name == 'push' && format('pdf-renders/{0}', github.sha) || '' }}
+
+      - name: Open PR for PDF updates
+        if: github.event_name == 'push'
+        run: |
+          gh pr create \
+            --title "Re-render charts for $(git rev-parse --short HEAD)" \
+            --body "Automatically re-rendered PDFs for commit ${{ github.sha }}." \
+            --head "pdf-renders/${{ github.sha }}" \
+            --base master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
