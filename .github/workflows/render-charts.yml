@@ -6,7 +6,7 @@ on:
       - "**/*.gs"
   push:
     branches:
-      - master
+      - main
     paths:
       - "**/*.gs"
 
@@ -27,21 +27,27 @@ jobs:
       - name: Create PDF update branch
         if: github.event_name == 'push'
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "pdf-renders/${{ github.sha }}"
           git push -u origin "pdf-renders/${{ github.sha }}"
 
       - uses: groovescript/chart-action@v0
         with:
-          base-ref: ${{ github.event_name == 'push' && 'master' || '' }}
-          head-ref: ${{ github.event_name == 'push' && format('pdf-renders/{0}', github.sha) || '' }}
+          only-changed: ${{ github.event_name == 'pull_request' }}
+          head-ref: ${{ github.event_name == 'push' && format('pdf-renders/{0}', github.sha) || github.event.pull_request.head.ref }}
 
       - name: Open PR for PDF updates
         if: github.event_name == 'push'
         run: |
-          gh pr create \
-            --title "Re-render charts for $(git rev-parse --short HEAD)" \
-            --body "Automatically re-rendered PDFs for commit ${{ github.sha }}." \
-            --head "pdf-renders/${{ github.sha }}" \
-            --base master
+          if git log origin/main..HEAD --oneline | grep -q .; then
+            gh pr create \
+              --title "Re-render charts for $(git rev-parse --short HEAD)" \
+              --body "Automatically re-rendered PDFs for commit ${{ github.sha }}." \
+              --head "pdf-renders/${{ github.sha }}" \
+              --base main
+          else
+            echo "No PDF changes, skipping PR."
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
