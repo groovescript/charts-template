@@ -1,6 +1,6 @@
 # My Charts
 
-A private collection of drum charts written in [GrooveScript](https://github.com/groovescript/groovescript) and rendered to PDF automatically on every pull request.
+A private collection of drum charts written in [GrooveScript](https://github.com/groovescript/groovescript) and rendered to PDF automatically on every commit to `main`.
 
 ---
 
@@ -28,25 +28,23 @@ Open **[groovescript.github.io/groovescript](https://groovescript.github.io/groo
 2. Navigate to your charts repo → `charts/` folder
 3. Tap **+** to create a new file (e.g., `my-groove.gs`), or tap an existing file to edit it
 4. Long-press in the text field → **Paste**
-5. Tap **Commit changes**
-6. Choose **"Create a new branch and open a pull request"** — this is important; committing directly to `main` does not trigger the render
-7. Give the PR a title (e.g., `Add hi-hat pattern`), then tap **Create Pull Request**
+5. Tap **Commit changes** and commit directly to `main`
 
-### Step 3 — Review the PDF
+### Step 3 — Review the auto-opened PDF PR
 
-Wait for the render action to finish (look for a green checkmark on the PR). Then:
+A minute or so after your commit, the workflow opens a PR titled **"Re-render charts for *`<sha>`*"** containing the rendered PDFs. Then:
 
 1. Open the PR in the GitHub app
 2. Tap **Files changed**
 3. Tap the `.pdf` file to preview the rendered chart
 
-If it looks right, **merge** the PR. If not, go back to the web editor, fix the chart, copy it again, and paste the updated version into the same file on the same branch — each new commit re-triggers the render.
+If it looks right, **merge** the PR to land the PDF on `main`. If not, go back to the web editor, fix the chart, and commit again to `main` — a new render PR will open for the new commit.
 
 ---
 
 ## If something goes wrong
 
-If your chart has a syntax error, no PDF will appear. Instead, you'll see a red **✗** on the PR check. Tap through to see the error — it will point to the exact line in your `.gs` file and describe what went wrong. Fix the file, commit the change to the same branch, and the render runs again automatically.
+If your chart has a syntax error, no PDF PR will open. Instead, you'll see a red **✗** on the commit in the repo's **Actions** tab. Tap through to see the error — it will point to the exact line in your `.gs` file and describe what went wrong. Fix the file, commit again to `main`, and the render runs again automatically.
 
 ---
 
